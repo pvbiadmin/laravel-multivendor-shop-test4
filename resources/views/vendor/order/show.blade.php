@@ -59,7 +59,7 @@
                                                     <p>Payment Method: {{ ucwords($order->payment_method) }}</p>
                                                     <p>Payment Status: {{ $order->payment_status === 0 ?
                                                         'Pending' : 'Completed' }}</p>
-                                                    <p>Transaction ID: {{ $order->transaction->transaction_id }}</p>
+                                                    <p>Transaction ID: {{ @$order->transaction->transaction_id }}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -196,7 +196,7 @@
             })(jQuery);
         };
 
-        const orderStateChange = (target) => {
+        const orderStateChange = () => {
             ($ => {
                 $(() => {
                     $("body").on("change", "#order_status", e => {

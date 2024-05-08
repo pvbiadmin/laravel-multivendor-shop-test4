@@ -47,61 +47,61 @@ Route::get('flash-sale', [FlashSaleController::class, 'index'])->name('flash-sal
 /**
  * Product Routes
  */
-Route::get('products', [ProductController::class, 'index'])->name('products.index');
-Route::get('product/detail/{slug}', [ProductController::class, 'detail'])->name('product-detail');
-Route::get('change-product-tab-view', [ProductController::class, 'changeProductTabView'])
-    ->name('change-product-tab-view');
-Route::get('change-product-detail-tab-view', [ProductController::class, 'changeProductDetailTabView'])
-    ->name('change-product-detail-tab-view');
+Route::controller(ProductController::class)->group(function () {
+    Route::get('products', 'index')->name('products.index');
+    Route::get('product/detail/{slug}', 'detail')->name('product-detail');
+    Route::get('change-product-tab-view', 'changeProductTabView')->name('change-product-tab-view');
+    Route::get('change-product-detail-tab-view', 'changeProductDetailTabView')
+        ->name('change-product-detail-tab-view');
+});
 
 /**
  * Cart Routes
  */
-Route::post('add-to-cart', [CartController::class, 'addToCart'])->name('add-to-cart');
-Route::get('cart-details', [CartController::class, 'cartDetails'])->name('cart-details');
-Route::post('cart/update-quantity', [CartController::class, 'updateProductQty'])
-    ->name('cart.update-quantity');
-Route::get('clear-cart', [CartController::class, 'clearCart'])->name('clear-cart');
-Route::get('cart/remove-product/{rowId}', [CartController::class, 'removeProduct'])
-    ->name('cart.remove-product');
-Route::get('cart-count', [CartController::class, 'getCartCount'])->name('cart-count');
-Route::get('cart-items', [CartController::class, 'getCartItems'])->name('cart-items');
-Route::post('cart/sidebar/remove-product', [CartController::class, 'removeSidebarProduct'])
-    ->name('cart.sidebar.remove-product');
-Route::get('cart/sidebar/subtotal', [CartController::class, 'cartSubtotal'])
-    ->name('cart.sidebar.subtotal');
-Route::get('cart/apply-coupon', [CartController::class, 'applyCoupon'])->name('cart.apply-coupon');
-Route::get('cart/coupon-calculation', [CartController::class, 'couponCalculation'])
-    ->name('cart.coupon-calculation');
-Route::get('cart/apply-referral', [CartController::class, 'applyReferral'])->name('cart.apply-referral');
+Route::controller(CartController::class)->group(function () {
+    Route::post('add-to-cart', 'addToCart')->name('add-to-cart');
+    Route::get('cart-details', 'cartDetails')->name('cart-details');
+    Route::post('cart/update-quantity', 'updateProductQty')->name('cart.update-quantity');
+    Route::get('clear-cart', 'clearCart')->name('clear-cart');
+    Route::get('cart/remove-product/{rowId}', 'removeProduct')->name('cart.remove-product');
+    Route::get('cart-count', 'getCartCount')->name('cart-count');
+    Route::get('cart-items', 'getCartItems')->name('cart-items');
+    Route::post('cart/sidebar/remove-product', 'removeSidebarProduct')
+        ->name('cart.sidebar.remove-product');
+    Route::get('cart/sidebar/subtotal', 'cartSubtotal')->name('cart.sidebar.subtotal');
+    Route::get('cart/apply-coupon', 'applyCoupon')->name('cart.apply-coupon');
+    Route::get('cart/coupon-calculation', 'couponCalculation')->name('cart.coupon-calculation');
+    Route::get('cart/apply-referral', 'applyReferral')->name('cart.apply-referral');
+});
 
 /** Newsletter routes */
-Route::post('newsletter-request', [NewsletterController::class, 'newsLetterRequest'])
-    ->name('newsletter-request');
-Route::get('newsletter-verify/{token}', [NewsletterController::class, 'newsLetterEmailVerify'])
-    ->name('newsletter-verify');
+Route::controller(NewsletterController::class)->group(function () {
+    Route::post('newsletter-request', 'newsLetterRequest')->name('newsletter-request');
+    Route::get('newsletter-verify/{token}', 'newsLetterEmailVerify')->name('newsletter-verify');
+});
 
 /** vendor page routes */
-Route::get('vendors', [HomeController::class, 'vendorsPage'])->name('vendors.index');
-Route::get('vendor-products/{id}', [HomeController::class, 'vendorProductsPage'])->name('vendor.products');
+Route::controller(HomeController::class)->group(function () {
+    Route::get('vendors', 'vendorsPage')->name('vendors.index');
+    Route::get('vendor-products/{id}', 'vendorProductsPage')->name('vendor.products');
+});
 
-/** about page route */
-Route::get('about', [PageController::class, 'about'])->name('about');
-
-/** terms and conditions page route */
-Route::get('terms-and-conditions', [PageController::class, 'termsAndCondition'])
-    ->name('terms-and-conditions');
-
-/** contact route */
-Route::get('contact', [PageController::class, 'contact'])->name('contact');
-Route::post('contact', [PageController::class, 'handleContactForm'])->name('handle-contact-form');
+/** Page Controller Routes */
+Route::controller(PageController::class)->group(function () {
+    Route::get('about', 'about')->name('about');
+    Route::get('terms-and-conditions', 'termsAndCondition')->name('terms-and-conditions');
+    Route::get('contact', 'contact')->name('contact');
+    Route::post('contact', 'handleContactForm')->name('handle-contact-form');
+});
 
 /** Product track route */
 Route::get('product-tracking', [ProductTrackController::class, 'index'])->name('product-tracking.index');
 
 /** blog routes */
-Route::get('blog-details/{slug}', [BlogController::class, 'blogDetails'])->name('blog-details');
-Route::get('blog', [BlogController::class, 'blog'])->name('blog');
+Route::controller(BlogController::class)->group(function () {
+    Route::get('blog-details/{slug}', 'blogDetails')->name('blog-details');
+    Route::get('blog', 'blog')->name('blog');
+});
 
 Route::get('wishlist/add-product', [WishlistController::class, 'addToWishlist'])
     ->name('wishlist.store');
@@ -127,16 +127,20 @@ Route::group([
     'as' => 'user.'
 ], function () {
     Route::get('dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
-    Route::get('profile', [UserProfileController::class, 'index'])->name('profile');
-    Route::put('profile', [UserProfileController::class, 'updateProfile'])->name('profile.update');
-    Route::post('profile', [UserProfileController::class, 'updatePassword'])->name('profile.update.password');
+
+    Route::controller(UserProfileController::class)->group(function () {
+        Route::get('profile', 'index')->name('profile');
+        Route::put('profile', 'updateProfile')->name('profile.update');
+        Route::post('profile', 'updatePassword')->name('profile.update.password');
+    });
 
     /** Message Route */
-    Route::get('messages', [UserMessageController::class, 'index'])->name('messages.index');
-    Route::post('send-message', [UserMessageController::class, 'sendMessage'])->name('send-message');
-    Route::get('get-messages', [UserMessageController::class, 'getMessages'])->name('get-messages');
-    Route::get('get-online-status', [UserMessageController::class, 'getOnlineStatus'])
-        ->name('get-online-status');
+    Route::controller(UserMessageController::class)->group(function () {
+        Route::get('messages', 'index')->name('messages.index');
+        Route::post('send-message', 'sendMessage')->name('send-message');
+        Route::get('get-messages', 'getMessages')->name('get-messages');
+        Route::get('get-online-status', 'getOnlineStatus')->name('get-online-status');
+    });
 
     /**
      * User Address Route
@@ -146,51 +150,54 @@ Route::group([
     /**
      * Orders Routes
      */
-    Route::get('orders', [UserOrderController::class, 'index'])->name('orders.index');
-    Route::get('orders/show/{id}', [UserOrderController::class, 'show'])->name('orders.show');
+    Route::controller(UserOrderController::class)->group(function () {
+        Route::get('orders', 'index')->name('orders.index');
+        Route::get('orders/show/{id}', 'show')->name('orders.show');
+    });
 
     /**
      * Wishlist Routes
      */
-    Route::get('wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
-    Route::get('wishlist/remove-product/{id}', [WishlistController::class, 'destroy'])
-        ->name('wishlist.destroy');
+    Route::controller(WishlistController::class)->group(function () {
+        Route::get('wishlist', 'index')->name('wishlist.index');
+        Route::get('wishlist/remove-product/{id}', 'destroy')->name('wishlist.destroy');
+    });
 
     /** product review routes */
-    Route::get('reviews', [ReviewController::class, 'index'])->name('review.index');
-    Route::post('review', [ReviewController::class, 'create'])->name('review.create');
+    Route::controller(ReviewController::class)->group(function () {
+        Route::get('reviews', 'index')->name('review.index');
+        Route::post('review', 'create')->name('review.create');
+    });
 
     /** blog comment routes */
     Route::post('blog-comment', [BlogController::class, 'comment'])->name('blog-comment');
 
     /** Vendor request route */
-    Route::get('vendor-apply', [UserVendorApplyController::class, 'index'])->name('vendor-apply.index');
-    Route::post('vendor-apply', [UserVendorApplyController::class, 'create'])->name('vendor-apply.create');
+    Route::controller(UserVendorApplyController::class)->group(function () {
+        Route::get('vendor-apply', 'index')->name('vendor-apply.index');
+        Route::post('vendor-apply', 'create')->name('vendor-apply.create');
+    });
 
     Route::get('packages', [PackageController::class, 'index'])->name('packages.index');
 
     /**
      * Checkout Routes
      */
-    Route::get('checkout', [CheckoutController::class, 'index'])->name('checkout');
-    Route::post('checkout/address-create', [CheckoutController::class, 'createAddress'])
-        ->name('checkout.address-create');
-    Route::post('checkout/form-submit', [CheckoutController::class, 'checkoutFormSubmit'])
-        ->name('checkout.form-submit');
+    Route::controller(CheckoutController::class)->group(function () {
+        Route::get('checkout', 'index')->name('checkout');
+        Route::post('checkout/address-create', 'createAddress')->name('checkout.address-create');
+        Route::post('checkout/form-submit', 'checkoutFormSubmit')->name('checkout.form-submit');
+    });
 
     /**
      * Payment Routes
      */
-    Route::get('payment', [PaymentController::class, 'index'])->name('payment');
-    Route::get('payment/success', [PaymentController::class, 'paymentSuccess'])->name('payment.success');
-
-    /**
-     * Paypal Routes
-     */
-    Route::get('paypal/payment', [PaymentController::class, 'payWithPaypal'])->name('paypal.payment');
-    Route::get('paypal/success', [PaymentController::class, 'paypalSuccess'])->name('paypal.success');
-    Route::get('paypal/cancel', [PaymentController::class, 'paypalCancel'])->name('paypal.cancel');
-
-    /** COD routes */
-    Route::get('cod/payment', [PaymentController::class, 'payWithCod'])->name('cod.payment');
+    Route::controller(PaymentController::class)->group(function () {
+        Route::get('payment', 'index')->name('payment');
+        Route::get('payment/success', 'paymentSuccess')->name('payment.success');
+        Route::get('paypal/payment', 'payWithPaypal')->name('paypal.payment');
+        Route::get('paypal/success', 'paypalSuccess')->name('paypal.success');
+        Route::get('paypal/cancel', 'paypalCancel')->name('paypal.cancel');
+        Route::get('cod/payment', 'payWithCod')->name('cod.payment');
+    });
 });

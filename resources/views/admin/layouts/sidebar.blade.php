@@ -221,6 +221,10 @@
                    href="{{ route('admin.messages.index') }}">
                     <i class="fas fa-comments"></i><span>Messages</span></a></li>
 
+            <li><a class="nav-link {{ setActive(['admin.referral-code.index']) }}"
+                   href="{{ route('admin.referral-code.index') }}">
+                    <i class="fas fa-code"></i><span>Referral Code</span></a></li>
+
             <li class="menu-header">Settings & More</li>
 
             <li class="dropdown {{ setActive([
