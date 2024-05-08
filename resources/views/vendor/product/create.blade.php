@@ -218,19 +218,18 @@
 
 @push( 'scripts' )
     <script>
-        const getCatFam = (fam = "sub") => {
-            let target = "#category";
-            let famUrl = "{{ route('vendor.product.get-subcategories') }}";
-            let idCatFam = $("#subcategory");
+        ($ => {
+            $(() => {
+                const getCatFam = (fam = "sub") => {
+                    let target = "#category";
+                    let famUrl = "{{ route('vendor.product.get-subcategories') }}";
+                    let idCatFam = $("#subcategory");
 
-            if (fam === 'child') {
-                target = "#subcategory";
-                famUrl = "{{ route('vendor.product.get-child-categories') }}";
-                idCatFam = $("#child_category");
-            }
-
-            ($ => {
-                $(() => {
+                    if (fam === 'child') {
+                        target = "#subcategory";
+                        famUrl = "{{ route('vendor.product.get-child-categories') }}";
+                        idCatFam = $("#child_category");
+                    }
                     $("body").on("change", target, e => {
                         const $this = $(e.currentTarget);
                         const famId = $this.val();
@@ -255,11 +254,11 @@
                             }
                         });
                     });
-                });
-            })(jQuery);
-        };
+                };
 
-        getCatFam();
-        getCatFam("child");
+                getCatFam();
+                getCatFam("child");
+            });
+        })(jQuery);
     </script>
 @endpush

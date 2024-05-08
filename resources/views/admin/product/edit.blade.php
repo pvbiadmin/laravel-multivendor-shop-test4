@@ -221,19 +221,19 @@
 
 @push('scripts')
     <script>
-        const getCatFam = (category, subcategory, childcategory, fam = "sub") => {
-            let target = category;
-            let famUrl = "{{ route('admin.product.get-subcategories') }}";
-            let idCatFam = $(subcategory);
+        ($ => {
+            $(() => {
+                const getCatFam = (category, subcategory, childcategory, fam = "sub") => {
+                    let target = category;
+                    let famUrl = "{{ route('admin.product.get-subcategories') }}";
+                    let idCatFam = $(subcategory);
 
-            if (fam === 'child') {
-                target = subcategory;
-                famUrl = "{{ route('admin.product.get-child-categories') }}";
-                idCatFam = $(childcategory);
-            }
+                    if (fam === 'child') {
+                        target = subcategory;
+                        famUrl = "{{ route('admin.product.get-child-categories') }}";
+                        idCatFam = $(childcategory);
+                    }
 
-            ($ => {
-                $(() => {
                     $("body").on("change", target, e => {
                         const $this = $(e.currentTarget);
                         const famId = $this.val();
@@ -259,11 +259,11 @@
                             }
                         });
                     });
-                });
-            })(jQuery);
-        };
+                };
 
-        getCatFam("#category", "#subcategory", "#child_category");
-        getCatFam("#category", "#subcategory", "#child_category", "child");
+                getCatFam("#category", "#subcategory", "#child_category");
+                getCatFam("#category", "#subcategory", "#child_category", "child");
+            });
+        })(jQuery);
     </script>
 @endpush

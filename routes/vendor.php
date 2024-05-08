@@ -43,10 +43,11 @@ Route::resource('shop-profile', VendorShopProfileController::class);
  * Vendor Product Routes
  */
 Route::controller(VendorProductController::class)->group(function () {
-    Route::put('product/change-status', 'changeStatus')->name('product.change-status');
-    Route::get('product/get-subcategories', 'getSubcategories')->name('product.get-subcategories');
-    Route::get('product/get-child-categories', 'getChildCategories')
-        ->name('product.get-child-categories');
+    Route::as('product.')->group(function () {
+        Route::put('product/change-status', 'changeStatus')->name('change-status');
+        Route::get('products/get-subcategories', 'getSubcategories')->name('get-subcategories');
+        Route::get('products/get-child-categories', 'getChildCategories')->name('get-child-categories');
+    });
 });
 Route::resource('products', VendorProductController::class);
 
@@ -66,22 +67,17 @@ Route::resource('products-variant', VendorProductVariantController::class);
  * Products Variant Option Routes
  */
 Route::controller(VendorProductVariantOptionController::class)->group(function () {
-    Route::put('products-variant-option/change-status', 'changeStatus')
-        ->name('products-variant-option.change-status');
-    Route::put('products-variant-option/change-is-default', 'changeIsDefault')
-        ->name('products-variant-option.change-is-default');
-    Route::get('products-variant-option/{productId}/{variantId}', 'index')
-        ->name('products-variant-option.index');
-    Route::get('products-variant-option/create/{productId}/{variantId}',
-        'create')->name('products-variant-option.create');
-    Route::post('products-variant-option', 'store')
-        ->name('products-variant-option.store');
-    Route::get('products-variant-option-edit/{variantOptionId}', 'edit')
-        ->name('products-variant-option.edit');
-    Route::put('products-variant-option-update/{variantOptionId}', 'update')
-        ->name('products-variant-option.update');
-    Route::delete('products-variant-option/{variantOptionId}', 'destroy')
-        ->name('products-variant-option.destroy');
+    Route::as('products-variant-option.')->group(function () {
+        Route::put('products-variant-option/change-status', 'changeStatus')->name('change-status');
+        Route::put('products-variant-option/change-is-default', 'changeIsDefault')
+            ->name('change-is-default');
+        Route::get('products-variant-option/{productId}/{variantId}', 'index')->name('index');
+        Route::get('products-variant-option/create/{productId}/{variantId}', 'create')->name('create');
+        Route::post('products-variant-option', 'store')->name('store');
+        Route::get('products-variant-option-edit/{variantOptionId}', 'edit')->name('edit');
+        Route::put('products-variant-option-update/{variantOptionId}', 'update')->name('update');
+        Route::delete('products-variant-option/{variantOptionId}', 'destroy')->name('destroy');
+    });
 });
 
 /**

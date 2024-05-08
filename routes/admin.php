@@ -98,8 +98,10 @@ Route::resource('child-category', ChildCategoryController::class);
  * Brand Routes
  */
 Route::controller(BrandController::class)->group(function () {
-    Route::put('brand/change-status', 'changeStatus')->name('brand.change-status');
-    Route::put('brand/change-is-featured', 'changeIsFeatured')->name('brand.change-is-featured');
+    Route::as('brand.')->group(function () {
+        Route::put('brand/change-status', 'changeStatus')->name('change-status');
+        Route::put('brand/change-is-featured', 'changeIsFeatured')->name('change-is-featured');
+    });
 });
 Route::resource('brand', BrandController::class);
 
@@ -112,10 +114,11 @@ Route::resource('vendor-profile', AdminVendorProfileController::class);
  * Products Routes
  */
 Route::controller(ProductController::class)->group(function () {
-    Route::put('product/change-status', 'changeStatus')->name('product.change-status');
-    Route::get('product/get-subcategories', 'getSubcategories')->name('product.get-subcategories');
-    Route::get('product/get-child-categories', 'getChildCategories')
-        ->name('product.get-child-categories');
+    Route::as('product.')->group(function () {
+        Route::put('product/change-status', 'changeStatus')->name('change-status');
+        Route::get('product/get-subcategories', 'getSubcategories')->name('get-subcategories');
+        Route::get('product/get-child-categories', 'getChildCategories')->name('get-child-categories');
+    });
 });
 Route::resource('products', ProductController::class);
 
@@ -135,52 +138,52 @@ Route::resource('products-variant', ProductVariantController::class);
  * Products Variant Option Routes
  */
 Route::controller(ProductVariantOptionController::class)->group(function () {
-    Route::put('products-variant-option/change-status', 'changeStatus')
-        ->name('products-variant-option.change-status');
-    Route::put('products-variant-option/change-is-default', 'changeIsDefault')
-        ->name('products-variant-option.change-is-default');
-    Route::get('products-variant-option/{productId}/{variantId}', 'index')
-        ->name('products-variant-option.index');
-    Route::get('products-variant-option/create/{productId}/{variantId}',
-        'create')->name('products-variant-option.create');
-    Route::post('products-variant-option', 'store')
-        ->name('products-variant-option.store');
-    Route::get('products-variant-option-edit/{variantOptionId}', 'edit')
-        ->name('products-variant-option.edit');
-    Route::put('products-variant-option-update/{variantOptionId}', 'update')
-        ->name('products-variant-option.update');
-    Route::delete('products-variant-option/{variantOptionId}', 'destroy')
-        ->name('products-variant-option.destroy');
+    Route::as('products-variant-option.')->group(function () {
+        Route::put('products-variant-option/change-status', 'changeStatus')->name('change-status');
+        Route::put('products-variant-option/change-is-default', 'changeIsDefault')
+            ->name('change-is-default');
+        Route::get('products-variant-option/{productId}/{variantId}', 'index')->name('index');
+        Route::get('products-variant-option/create/{productId}/{variantId}', 'create')->name('create');
+        Route::post('products-variant-option', 'store')->name('store');
+        Route::get('products-variant-option-edit/{variantOptionId}', 'edit')->name('edit');
+        Route::put('products-variant-option-update/{variantOptionId}', 'update')->name('update');
+        Route::delete('products-variant-option/{variantOptionId}', 'destroy')->name('destroy');
+    });
 });
 
 /** reviews routes */
-Route::get('reviews', [AdminReviewController::class, 'index'])->name('reviews.index');
-Route::put('reviews/change-status', [AdminReviewController::class, 'changeStatus'])
-    ->name('reviews.change-status');
+Route::controller(AdminReviewController::class)->group(function () {
+    Route::as('reviews.')->group(function () {
+        Route::get('reviews', 'index')->name('index');
+        Route::put('reviews/change-status', 'changeStatus')->name('change-status');
+    });
+});
 
 /**
  * Seller Product Routes
  */
 Route::controller(SellerProductController::class)->group(function () {
-    Route::put('seller-products/change-status', 'changeStatus')
-        ->name('seller-products.change-status');
-    Route::put('seller-products/change-is-approved', 'changeIsApproved')
-        ->name('seller-products.change-is-approved');
-    Route::get('seller-products', 'index')->name('seller-products.index');
-    Route::get('seller-products/pending', 'pendingProducts')->name('seller-products.pending');
+    Route::as('seller-products.')->group(function () {
+        Route::put('seller-products/change-status', 'changeStatus')->name('change-status');
+        Route::put('seller-products/change-is-approved', 'changeIsApproved')
+            ->name('change-is-approved');
+        Route::get('seller-products', 'index')->name('index');
+        Route::get('seller-products/pending', 'pendingProducts')->name('pending');
+    });
 });
 
 /**
  * Flash Sale Routes
  */
 Route::controller(FlashSaleController::class)->group(function () {
-    Route::put('flash-sale/change-status', 'changeStatus')->name('flash-sale.change-status');
-    Route::put('flash-sale/change-show-at-home', 'changeShowAtHome')
-        ->name('flash-sale.change-show-at-home');
-    Route::get('flash-sale', 'index')->name('flash-sale.index');
-    Route::put('flash-sale', 'update')->name('flash-sale.update');
-    Route::post('flash-sale/add-product', 'addProduct')->name('flash-sale.add-product');
-    Route::delete('flash-sale/{flashSaleId}', 'destroy')->name('flash-sale.destroy');
+    Route::as('flash-sale.')->group(function () {
+        Route::put('flash-sale/change-status', 'changeStatus')->name('change-status');
+        Route::put('flash-sale/change-show-at-home', 'changeShowAtHome')->name('change-show-at-home');
+        Route::get('flash-sale', 'index')->name('index');
+        Route::put('flash-sale', 'update')->name('update');
+        Route::post('flash-sale/add-product', 'addProduct')->name('add-product');
+        Route::delete('flash-sale/{flashSaleId}', 'destroy')->name('destroy');
+    });
 });
 
 /**
@@ -222,9 +225,11 @@ Route::get('transaction', [TransactionController::class, 'index'])->name('transa
 
 /** Withdraw method route */
 Route::controller(WithdrawMethodController::class)->group(function () {
-    Route::get('withdraw', 'index')->name('withdraw.index');
-    Route::get('withdraw/{id}', 'show')->name('withdraw.show');
-    Route::put('withdraw/{id}', 'update')->name('withdraw.update');
+    Route::as('withdraw.')->group(function () {
+        Route::get('withdraw', 'index')->name('index');
+        Route::get('withdraw/{id}', 'show')->name('show');
+        Route::put('withdraw/{id}', 'update')->name('update');
+    });
 });
 Route::resource('withdraw-method', WithdrawMethodController::class);
 
@@ -269,8 +274,10 @@ Route::put('blog/change-status', [BlogController::class, 'changeStatus'])->name(
 Route::resource('blog', BlogController::class);
 
 Route::controller(BlogCommentController::class)->group(function () {
-    Route::get('blog-comments', 'index')->name('blog-comments.index');
-    Route::delete('blog-comments/{id}/destroy', 'destroy')->name('blog-comments.destroy');
+    Route::as('blog-comments.')->group(function () {
+        Route::get('blog-comments', 'index')->name('index');
+        Route::delete('blog-comments/{id}/destroy', 'destroy')->name('destroy');
+    });
 });
 
 /** Subscribers route */
@@ -298,53 +305,68 @@ Route::controller(AdvertisementController::class)->group(function () {
 
 /** Vendor request routes */
 Route::controller(VendorApplicationController::class)->group(function () {
-    Route::get('vendor-applications', 'index')->name('vendor-applications.index');
-    Route::get('vendor-applications/{id}/show', 'show')->name('vendor-applications.show');
-    Route::put('vendor-applications/{id}/change-status', 'changeStatus')
-        ->name('vendor-applications.change-status');
+    Route::as('vendor-applications.')->group(function () {
+        Route::get('vendor-applications', 'index')->name('index');
+        Route::get('vendor-applications/{id}/show', 'show')->name('show');
+        Route::put('vendor-applications/{id}/change-status', 'changeStatus')->name('change-status');
+    });
 });
 
 /** customer list routes */
 Route::controller(CustomerListController::class)->group(function () {
-    Route::get('customer', 'index')->name('customer.index');
-    Route::put('customer/change-status', 'changeStatus')->name('customer.change-status');
+    Route::as('customer.')->group(function () {
+        Route::get('customer', 'index')->name('index');
+        Route::put('customer/change-status', 'changeStatus')->name('change-status');
+    });
 });
 
 /** admin list routes */
 Route::controller(AdminListController::class)->group(function () {
-    Route::get('admin-list', 'index')->name('admin-list.index');
-    Route::put('admin-list/change-status', 'changeStatus')->name('admin-list.change-status');
-    Route::delete('admin-list/{id}', 'destroy')->name('admin-list.destroy');
+    Route::as('admin-list.')->group(function () {
+        Route::get('admin-list', 'index')->name('index');
+        Route::put('admin-list/change-status', 'changeStatus')->name('change-status');
+        Route::delete('admin-list/{id}', 'destroy')->name('destroy');
+    });
 });
 
 /** manage user routes */
 Route::controller(ManageUserController::class)->group(function () {
-    Route::get('manage-user', 'index')->name('manage-user.index');
-    Route::post('manage-user', 'create')->name('manage-user.create');
+    Route::as('manage-user.')->group(function () {
+        Route::get('manage-user', 'index')->name('index');
+        Route::post('manage-user', 'create')->name('create');
+    });
 });
 
 /** vendor list routes */
 Route::controller(VendorListController::class)->group(function () {
-    Route::get('vendor-list', 'index')->name('vendor-list.index');
-    Route::put('vendor-list/change-status', 'changeStatus')->name('vendor-list.change-status');
+    Route::as('vendor-list.')->group(function () {
+        Route::get('vendor-list', 'index')->name('index');
+        Route::put('vendor-list/change-status', 'changeStatus')->name('change-status');
+    });
 });
 
 /** vendor condition routes */
 Route::controller(VendorConditionController::class)->group(function () {
-    Route::get('vendor-condition', 'index')->name('vendor-condition.index');
-    Route::put('vendor-condition/update', 'update')->name('vendor-condition.update');
+    Route::as('vendor-condition.')->group(function () {
+        Route::get('vendor-condition', 'index')->name('index');
+        Route::put('vendor-condition/update', 'update')->name('update');
+    });
 });
 
 /** about routes */
 Route::controller(AboutController::class)->group(function () {
-    Route::get('about', 'index')->name('about.index');
-    Route::put('about/update', 'update')->name('about.update');
+    Route::as('about.')->group(function () {
+        Route::get('about', 'index')->name('index');
+        Route::put('about/update', 'update')->name('update');
+    });
 });
 
 /** terms and conditions routes */
 Route::controller(TermsAndConditionController::class)->group(function () {
-    Route::get('terms-and-conditions', 'index')->name('terms-and-conditions.index');
-    Route::put('terms-and-conditions/update', 'update')->name('terms-and-conditions.update');
+    Route::as('terms-and-conditions.')->group(function () {
+        Route::get('terms-and-conditions', 'index')->name('index');
+        Route::put('terms-and-conditions/update', 'update')->name('update');
+    });
 });
 
 /** footer routes */
@@ -355,16 +377,18 @@ Route::put('footer-socials/change-status', [FooterSocialController::class, 'chan
 Route::resource('footer-socials', FooterSocialController::class);
 
 Route::controller(FooterGridTwoController::class)->group(function () {
-    Route::put('footer-grid-two/change-status', 'changeStatus')->name('footer-grid-two.change-status');
-    Route::put('footer-grid-two/change-title', 'changeTitle')->name('footer-grid-two.change-title');
+    Route::as('footer-grid-two.')->group(function () {
+        Route::put('footer-grid-two/change-status', 'changeStatus')->name('change-status');
+        Route::put('footer-grid-two/change-title', 'changeTitle')->name('change-title');
+    });
 });
 Route::resource('footer-grid-two', FooterGridTwoController::class);
 
 Route::controller(FooterGridThreeController::class)->group(function () {
-    Route::put('footer-grid-three/change-status', 'changeStatus')
-        ->name('footer-grid-three.change-status');
-    Route::put('footer-grid-three/change-title', 'changeTitle')
-        ->name('footer-grid-three.change-title');
+    Route::as('footer-grid-three.')->group(function () {
+        Route::put('footer-grid-three/change-status', 'changeStatus')->name('change-status');
+        Route::put('footer-grid-three/change-title', 'changeTitle')->name('change-title');
+    });
 });
 Route::resource('footer-grid-three', FooterGridThreeController::class);
 
@@ -373,4 +397,5 @@ Route::resource('footer-grid-three', FooterGridThreeController::class);
  */
 Route::get('payment-setting', [PaymentSettingController::class, 'index'])->name('payment-setting');
 Route::resource('paypal-setting', PaypalSettingController::class);
+
 Route::put('cod-setting/{id}', [CodSettingController::class, 'update'])->name('cod-setting.update');
