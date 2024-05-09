@@ -502,6 +502,10 @@
                         const $this = $(e.currentTarget);
                         const formData = $this.serialize();
 
+                        // console.log(formData);
+                        //
+                        // return;
+
                         $.ajax({
                             url: "{{ route('cart.apply-referral') }}",
                             method: "GET",
@@ -548,6 +552,7 @@
                 changeQuantity("less");
                 clearCart();
                 applyCoupon();
+                applyReferral();
             });
         })(jQuery);
     </script>

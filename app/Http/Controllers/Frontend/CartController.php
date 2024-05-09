@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Session;
+use Vinkla\Hashids\Facades\Hashids;
 
 class CartController extends Controller
 {
@@ -347,17 +348,6 @@ class CartController extends Controller
     {
         $referral_code = $request->input('referral');
 
-        // Check if session coupon is set and its code matches the current coupon code
-        if (Session::has('referral')) {
-            $sessionReferral = Session::get('referral');
-            if ($sessionReferral['code'] === $referral_code) {
-                return response([
-                    'status' => 'error',
-                    'message' => 'Referral code already applied.'
-                ]);
-            }
-        }
-
         if ($referral_code === null) {
             return response([
                 'status' => 'error',
@@ -366,13 +356,12 @@ class CartController extends Controller
         }
 
         $referrer_id = $this->decodeReferral($referral_code);
-        $referrer = User::find($referrer_id);
+        $referrer = User::find($referrer_id)->first();
 
         Session::put('referral', [
-            'referrer_id' => $referrer->id,
-            'referrer_username' => $referrer->username,
+            'id' => $referrer->id,
+            'name' => 'basic_pack',
             'code' => $referral_code,
-            'package_type' => 'basic_pack',
             'points' => 10, // points
             'bonus' => 100 // e-wallet
         ]);
@@ -386,5 +375,6 @@ class CartController extends Controller
     public function decodeReferral($referral_code)
     {
         /* To do: Obtain the referrer_id based on the referral code */
+        return Hashids::decode($referral_code);
     }
 }
