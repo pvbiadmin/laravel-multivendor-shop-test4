@@ -25,6 +25,13 @@
                 <i class="fas fa-store-alt"></i>Shop Profile</a></li>
         <li><a class="{{ setActive(['vendor.profile']) }}" href="{{ route('vendor.profile') }}">
                 <i class="far fa-user"></i> My Profile</a></li>
+        <li><a class="{{ setActive(['vendor.packages.*']) }}" href="{{
+                route('vendor.packages.index') }}">
+                <i class="far fa-box"></i>Packages</a></li>
+        <li>
+        <li><a class="{{ setActive(['vendor.referral-code.index']) }}"
+               href="{{ route('vendor.referral-code.index') }}">
+                <i class="fas fa-code"></i>Referral Code</a></li>
         <li>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf

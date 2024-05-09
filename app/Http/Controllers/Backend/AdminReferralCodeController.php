@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Backend;
 
+use App\Http\Controllers\Controller;
 use App\Helper\MailHelper;
 use App\Mail\SendReferralCode;
 use Exception;
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Vinkla\Hashids\Facades\Hashids;
 
-class ReferralCodeController extends Controller
+class AdminReferralCodeController extends Controller
 {
     /**
      * View Referral Code Generation Page

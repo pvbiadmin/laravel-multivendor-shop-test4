@@ -3,6 +3,7 @@
 use App\Http\Controllers\Frontend\BlogController;
 use App\Http\Controllers\Frontend\CheckoutController;
 use App\Http\Controllers\Frontend\NewsletterController;
+use App\Http\Controllers\Frontend\PackageController;
 use App\Http\Controllers\Frontend\PageController;
 use App\Http\Controllers\Frontend\PaymentController;
 use App\Http\Controllers\Frontend\CartController;
@@ -16,9 +17,9 @@ use App\Http\Controllers\Frontend\UserDashboardController;
 use App\Http\Controllers\Frontend\UserMessageController;
 use App\Http\Controllers\Frontend\UserOrderController;
 use App\Http\Controllers\Frontend\UserProfileController;
+use App\Http\Controllers\Frontend\UserReferralCodeController;
 use App\Http\Controllers\Frontend\UserVendorApplyController;
 use App\Http\Controllers\Frontend\WishlistController;
-use App\Http\Frontend\Controllers\PackageController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -140,6 +141,15 @@ Route::group([
         Route::post('send-message', 'sendMessage')->name('send-message');
         Route::get('get-messages', 'getMessages')->name('get-messages');
         Route::get('get-online-status', 'getOnlineStatus')->name('get-online-status');
+    });
+
+    /** Referral code route */
+    Route::controller(UserReferralCodeController::class)->group(function () {
+        Route::as('referral-code.')->group(function () {
+            Route::get('referral-code', 'index')->name('index');
+            Route::get('referral-code/generate', 'generateCode')->name('generate');
+            Route::post('referral-code/send', 'sendCode')->name('send');
+        });
     });
 
     /**

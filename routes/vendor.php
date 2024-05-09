@@ -9,8 +9,10 @@ use App\Http\Controllers\Backend\VendorProductReviewController;
 use App\Http\Controllers\Backend\VendorProductVariantController;
 use App\Http\Controllers\Backend\VendorProductVariantOptionController;
 use App\Http\Controllers\Backend\VendorProfileController;
+use App\Http\Controllers\Backend\VendorReferralCodeController;
 use App\Http\Controllers\Backend\VendorShopProfileController;
 use App\Http\Controllers\Backend\VendorWithdrawController;
+use App\Http\Controllers\Backend\VendorPackageController;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -32,6 +34,15 @@ Route::controller(VendorMessageController::class)->group(function () {
     Route::get('messages', 'index')->name('messages.index');
     Route::post('send-message', 'sendMessage')->name('send-message');
     Route::get('get-messages', 'getMessages')->name('get-messages');
+});
+
+/** Referral code route */
+Route::controller(VendorReferralCodeController::class)->group(function () {
+    Route::as('referral-code.')->group(function () {
+        Route::get('referral-code', 'index')->name('index');
+        Route::get('referral-code/generate', 'generateCode')->name('generate');
+        Route::post('referral-code/send', 'sendCode')->name('send');
+    });
 });
 
 /**
@@ -79,6 +90,8 @@ Route::controller(VendorProductVariantOptionController::class)->group(function (
         Route::delete('products-variant-option/{variantOptionId}', 'destroy')->name('destroy');
     });
 });
+
+Route::get('packages', [VendorPackageController::class, 'index'])->name('packages.index');
 
 /**
  * Orders Route

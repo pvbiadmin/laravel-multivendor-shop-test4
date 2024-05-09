@@ -3,6 +3,7 @@
 
 use App\Http\Controllers\Backend\AboutController;
 use App\Http\Controllers\Backend\AdminListController;
+use App\Http\Controllers\Backend\AdminReferralCodeController;
 use App\Http\Controllers\Backend\BlogCategoryController;
 use App\Http\Controllers\Backend\BlogCommentController;
 use App\Http\Controllers\Backend\BlogController;
@@ -44,7 +45,6 @@ use App\Http\Controllers\Backend\VendorApplicationController;
 use App\Http\Controllers\Backend\VendorConditionController;
 use App\Http\Controllers\Backend\VendorListController;
 use App\Http\Controllers\Backend\WithdrawMethodController;
-use App\Http\Controllers\ReferralCodeController;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -241,7 +241,7 @@ Route::controller(MessageController::class)->group(function () {
 });
 
 /** Referral code route */
-Route::controller(ReferralCodeController::class)->group(function () {
+Route::controller(AdminReferralCodeController::class)->group(function () {
     Route::as('referral-code.')->group(function () {
         Route::get('referral-code', 'index')->name('index');
         Route::get('referral-code/generate', 'generateCode')->name('generate');

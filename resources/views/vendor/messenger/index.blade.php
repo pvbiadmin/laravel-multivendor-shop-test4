@@ -1,5 +1,9 @@
 @extends( 'vendor.layouts.master' )
 
+@section( 'title' )
+    {{ $settings->site_name }} || Messages
+@endsection
+
 @section( 'content' )
     <section id="wsus__dashboard">
         <div class="container-fluid">
@@ -157,6 +161,7 @@
                         error: (xhr, status, error) => {
                             console.error(`Error: ${status}`);
                             console.error(xhr.responseText);
+                            console.error(error);
                         }
                     });
                 }

@@ -32,6 +32,10 @@
         <li><a class="{{ setActive(['user.packages.*']) }}" href="{{
                 route('user.packages.index') }}">
                 <i class="far fa-box"></i>Packages</a></li>
+        <li><a class="{{ setActive(['user.referral-code.index']) }}"
+               href="{{ route('user.referral-code.index') }}">
+                <i class="fas fa-code"></i>Referral Code</a></li>
+        <li>
         <li>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
