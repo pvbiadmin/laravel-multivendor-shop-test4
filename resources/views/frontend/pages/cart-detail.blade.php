@@ -135,15 +135,14 @@
                             <h6>total cart</h6>
                             <p>subtotal: <span id="cart-detail-subtotal">{{ $settings->currency_icon .
                                 number_format(cartSubtotal(), 2) }}</span></p>
-                            @if ( !( $cart_package && $cart_package[0]->options->is_package == 1 ) )
-                                <p>coupon(-): <span id="coupon-discount">{{ $settings->currency_icon .
+                            <p>coupon(-): <span id="coupon-discount">{{ $settings->currency_icon .
                                     number_format(couponDiscount(), 2) }}</span></p>
-                            @endif
-                            <p class="total"><span>total:</span> <span id="cart-total">{{ $settings->currency_icon .
-                                number_format(cartTotal(), 2) }}</span></p>
+                            <p class="total"><span>total:</span> <span id="cart-total">{{
+                                $settings->currency_icon . number_format(cartTotal(), 2) }}</span></p>
                             @if ( $cart_package && $cart_package[0]->options->is_package == 1 )
                                 <form id="referral_form">
-                                    <input type="text" name="referral"
+                                    <input type="text" name="referral" value="{{ session()->has('referral')
+                                        ? session('referral')['code'] : '' }}"
                                            placeholder="Referral Code" aria-label="referral">
                                     <button type="submit" class="common_btn">apply</button>
                                 </form>
@@ -501,10 +500,6 @@
 
                         const $this = $(e.currentTarget);
                         const formData = $this.serialize();
-
-                        // console.log(formData);
-                        //
-                        // return;
 
                         $.ajax({
                             url: "{{ route('cart.apply-referral') }}",

@@ -10,7 +10,9 @@ use App\Models\Order;
 use App\Models\OrderProduct;
 use App\Models\PaypalSetting;
 use App\Models\Product;
+use App\Models\Referral;
 use App\Models\Transaction;
+use App\Models\User;
 use Auth;
 use Gloudemans\Shoppingcart\Facades\Cart;
 use Illuminate\Contracts\View\Factory;
@@ -88,8 +90,25 @@ class PaymentController extends Controller
 
         $this->storeOrderProduct($order->id);
         $this->updateCoupon();
+        $this->referralEntry();
         $this->storeOrderTransaction(
             $order->id, $transaction_id, $payment_method, $paid_amount, $paid_currency_name);
+    }
+
+    public function referralEntry()
+    {
+        $referral_session = Session::get('referral');
+
+        if ($referral_session && isset($referral_session['id'])) {
+            $referrer_id = User::find($referral_session['id'])->first()->id;
+            $referred_id = auth()->user()->id;
+
+            Referral::create([
+                'referrer_id' => $referrer_id,
+                'referred_id' => $referred_id,
+                'status' => 0,
+            ]);
+        }
     }
 
     public function updateCoupon()
