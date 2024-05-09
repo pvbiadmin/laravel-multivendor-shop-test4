@@ -8,8 +8,6 @@ use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
 use Yajra\DataTables\Html\Button;
 use Yajra\DataTables\Html\Column;
-use Yajra\DataTables\Html\Editor\Editor;
-use Yajra\DataTables\Html\Editor\Fields;
 use Yajra\DataTables\Services\DataTable;
 
 class NewsletterSubscriberDataTable extends DataTable
@@ -28,7 +26,7 @@ class NewsletterSubscriberDataTable extends DataTable
             })
             ->addColumn('is_verified', function ($query) {
                 return match ($query->is_verified) {
-                    1 => '<i class="badge badge-success">Yes</i>',
+                    '1' => '<i class="badge badge-success">Yes</i>',
                     default => '<i class="badge badge-danger">No</i>',
                 };
             })

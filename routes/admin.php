@@ -241,7 +241,13 @@ Route::controller(MessageController::class)->group(function () {
 });
 
 /** Referral code route */
-Route::get('referral-code', [ReferralCodeController::class, 'index'])->name('referral-code.index');
+Route::controller(ReferralCodeController::class)->group(function () {
+    Route::as('referral-code.')->group(function () {
+        Route::get('referral-code', 'index')->name('index');
+        Route::get('referral-code/generate', 'generateCode')->name('generate');
+        Route::post('referral-code/send', 'sendCode')->name('send');
+    });
+});
 
 /**
  * Settings Routes

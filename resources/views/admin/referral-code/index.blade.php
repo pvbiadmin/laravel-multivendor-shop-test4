@@ -18,24 +18,28 @@
                         <div class="card card-primary">
                             <div class="card-header">
                                 <div class="buttons">
-                                    <a href="javascript:" class="btn btn-info">Generate Code</a>
-                                    <a href="javascript:" class="btn" id="referral_code">
-                                        test code</a>
-                                    <a href="javascript:" class="btn" id="copyButton" onclick="copyReferralLink()">
+                                    <button class="btn btn-info" id="generate-code">Generate Code</button>
+                                    <a href="javascript:" class="btn" id="referral_code"></a>
+                                    <a href="javascript:" class="btn d-none" id="copyButton"
+                                       onclick="copyReferralCode()">
                                         <i class="fa fa-copy"></i> Copy</a>
                                 </div>
                             </div>
 
                             <div class="card-body">
-                                <form method="POST">
+                                <form action="{{ route('admin.referral-code.send') }}" method="POST">
+                                    @csrf
                                     <div class="form-group">
                                         <div class="input-group">
+                                            <input type="hidden" name="referral_code" id="referral_code_send">
+                                            <input type="hidden" name="from_address"
+                                                   value="{{ auth()->user()->email }}">
                                             <div class="input-group-prepend">
                                                 <div class="input-group-text">
                                                     <i class="fas fa-envelope"></i>
                                                 </div>
                                             </div>
-                                            <input id="email" type="email" class="form-control" name="email"
+                                            <input id="email" type="email" class="form-control" name="to_address"
                                                    autofocus="" placeholder="Email" aria-label="email">
                                         </div>
                                     </div>
@@ -57,7 +61,7 @@
 
 @push( 'scripts' )
     <script>
-        const copyReferralLink = () => {
+        const copyReferralCode = () => {
             const referralLink = document.getElementById('referral_code');
             const textToCopy = referralLink.innerText;
 
@@ -76,34 +80,33 @@
             }, 3000);
         }
 
-        {{--const flashSaleToggle = (cl_target, url_route) => {--}}
-        {{--    ($ => {--}}
-        {{--        $(() => {--}}
-        {{--            $("body").on("click", cl_target, e => {--}}
-        {{--                const $this = $(e.currentTarget);--}}
-        {{--                const isChecked = $this.is(':checked');--}}
-        {{--                const idToggle = $this.data('id');--}}
+        const generateCode = () => {
+            ($ => {
+                $(() => {
+                    $("body").on("click", "#generate-code", () => {
+                        $.ajax({
+                            url: "{{ route('admin.referral-code.generate' )}}",
+                            method: "GET",
+                            success: res => {
+                                if (res.status === "success") {
+                                    $("#referral_code").text(res.message);
+                                    $("#referral_code_send").val(res.message);
+                                    $("#copyButton").removeClass("d-none");
+                                }
 
-        {{--                $.ajax({--}}
-        {{--                    url: url_route,--}}
-        {{--                    method: "PUT",--}}
-        {{--                    data: {--}}
-        {{--                        isChecked: isChecked,--}}
-        {{--                        idToggle: idToggle--}}
-        {{--                    },--}}
-        {{--                    success: res => {--}}
-        {{--                        toastr.success(res.message);--}}
-        {{--                    },--}}
-        {{--                    error: (xhr, status, error) => {--}}
-        {{--                        console.log(error);--}}
-        {{--                    }--}}
-        {{--                });--}}
-        {{--            });--}}
-        {{--        });--}}
-        {{--    })(jQuery);--}}
-        {{--}--}}
+                                if (res.status === "error") {
+                                    toastr.error(res.message);
+                                }
+                            },
+                            error: (xhr, status, error) => {
+                                console.log(error);
+                            }
+                        });
+                    });
+                });
+            })(jQuery);
+        }
 
-        {{--flashSaleToggle(".change-status", "{{ route('admin.flash-sale.change-status' )}}");--}}
-        {{--flashSaleToggle(".change-show-at-home", "{{ route('admin.flash-sale.change-show-at-home') }}");--}}
+        generateCode();
     </script>
 @endpush
