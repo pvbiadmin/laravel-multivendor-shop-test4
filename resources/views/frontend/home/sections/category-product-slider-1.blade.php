@@ -1,64 +1,74 @@
 @php
-    $category_product_slider = isset($category_product_slider) ?
-        json_decode($category_product_slider) : null;
+    // Parse JSON input
+    $category_product_slider = json_decode($category_product_slider);
 
+    // Extract slider data
     $cat_product_sliders = $category_product_slider ? json_decode($category_product_slider->value, true) : null;
 
-    $cat_product_slider1 = $cat_product_sliders ? $cat_product_sliders[0] : null;
+    // Get the first slider
+    $cat_product_slider1 = $cat_product_sliders ? reset($cat_product_sliders) : null;
 
-    $result = [];
+    $result = null;
 
-    // Loop through the array in reverse order
-    $keys = array_keys($cat_product_slider1);
-
-    for ($i = count($keys) - 1; $i >= 0; $i--) {
-        $key = $keys[$i];
-        // Check if the element is not null
-        if ($cat_product_slider1[$key] !== null) {
-            // Save the non-null element in the result array
-            $result[$key] = $cat_product_slider1[$key];
-            // Break the loop since we only want the last non-null element
-            break;
+    if ($cat_product_slider1) {
+        // Find the last non-null element
+        $keys = array_keys($cat_product_slider1);
+        // Check if array keys exist
+        if ($keys) {
+            // Loop through the array in reverse order
+            for ($i = count($keys) - 1; $i >= 0; $i--) {
+                $key = $keys[$i];
+                // Check if the element is not null
+                if ($cat_product_slider1[$key] !== null) {
+                    // Save the non-null element in the result array
+                    $result = $cat_product_slider1[$key];
+                    // Break the loop since we only want the last non-null element
+                    break;
+                }
+            }
         }
     }
 
-    switch (key($result)) {
-        case 'subcategory':
-            $category = \App\Models\Subcategory::query()
-                ->findOrFail($result['subcategory']);
-            $products = \App\Models\Product::query()
-                ->withAvg('reviews', 'rating')
-                ->withCount('reviews')
-                ->with(['variants', 'category', 'imageGallery'])
-                ->where('subcategory_id', '=', $result['subcategory'])
-                ->orderBy('id', 'DESC')->take(12)->get();
-            $search['subcategory'] = $category->slug;
-        break;
-        case 'child_category':
-            $category = \App\Models\ChildCategory::query()
-            ->findOrFail($result['child_category']);
-            $products = \App\Models\Product::query()
-                ->withAvg('reviews', 'rating')
-                ->withCount('reviews')
-                ->with(['variants', 'category', 'imageGallery'])
-                ->where('child_category_id', '=', $result['child_category'])
-                ->orderBy('id', 'DESC')->take(12)->get();
-            $search['child_category'] = $category->slug;
-        break;
-        default:
-            $category = \App\Models\Category::query()
-                ->findOrFail($result['category']);
-            $products = \App\Models\Product::query()
-                ->withAvg('reviews', 'rating')
-                ->withCount('reviews')
-                ->with(['variants', 'category', 'imageGallery'])
-                ->where('category_id', '=', $result['category'])
-                ->orderBy('id', 'DESC')->take(12)->get();
-            $search['category'] = $category->slug;
-        break;
+    if ($result) {
+        switch (key($cat_product_slider1)) {
+            case 'subcategory':
+                $category = \App\Models\Subcategory::findOrFail($result);
+                $products = \App\Models\Product::withAvg('reviews', 'rating')
+                    ->withCount('reviews')
+                    ->with(['variants', 'category', 'imageGallery'])
+                    ->where('subcategory_id', '=', $result)
+                    ->orderBy('id', 'DESC')
+                    ->take(12)
+                    ->get();
+                $search['subcategory'] = $category->slug;
+                break;
+            case 'child_category':
+                $category = \App\Models\ChildCategory::findOrFail($result);
+                $products = \App\Models\Product::withAvg('reviews', 'rating')
+                    ->withCount('reviews')
+                    ->with(['variants', 'category', 'imageGallery'])
+                    ->where('child_category_id', '=', $result)
+                    ->orderBy('id', 'DESC')
+                    ->take(12)
+                    ->get();
+                $search['child_category'] = $category->slug;
+                break;
+            default:
+                $category = \App\Models\Category::findOrFail($result);
+                $products = \App\Models\Product::withAvg('reviews', 'rating')
+                    ->withCount('reviews')
+                    ->with(['variants', 'category', 'imageGallery'])
+                    ->where('category_id', '=', $result)
+                    ->orderBy('id', 'DESC')
+                    ->take(12)
+                    ->get();
+                $search['category'] = $category->slug;
+                break;
+        }
     }
 @endphp
-@if ( count($products ) > 0)
+
+@if ( isset($products) && count($products) > 0)
     <section id="wsus__electronic">
         <div class="container">
             <div class="row">

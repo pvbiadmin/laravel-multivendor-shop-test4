@@ -73,7 +73,7 @@
             document.body.removeChild(dummyElement);
 
             const copyButton = document.getElementById('copyButton');
-            copyButton.innerHTML = '<i class="fa fa-copy"></i> Copied!';
+            copyButton.innerHTML = '<i class="fa fa-check"></i> Copied!';
 
             setTimeout(() => {
                 copyButton.innerHTML = '<i class="fa fa-copy"></i> Copy';

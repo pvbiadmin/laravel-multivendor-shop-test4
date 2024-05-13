@@ -7,6 +7,7 @@ use App\Models\Advertisement;
 use App\Models\Coupon;
 use App\Models\Product;
 use App\Models\ProductVariantOption;
+use App\Models\Referral;
 use App\Models\User;
 use Gloudemans\Shoppingcart\Facades\Cart;
 use Illuminate\Contracts\Routing\ResponseFactory;
@@ -17,6 +18,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Vinkla\Hashids\Facades\Hashids;
 
@@ -42,7 +44,9 @@ class CartController extends Controller
                 'status' => 'error',
                 'message' => 'Product Out of Stock.'
             ]);
-        } elseif ($product->quantity < $quantity) {
+        }
+
+        if ($product->quantity < $quantity) {
             return response([
                 'status' => 'error',
                 'message' => 'Product Short of Stock.'
@@ -128,7 +132,9 @@ class CartController extends Controller
                 'status' => 'error',
                 'message' => 'Product Out of Stock.'
             ]);
-        } elseif ($product->quantity < $quantity) {
+        }
+
+        if ($product->quantity < $quantity) {
             return response([
                 'status' => 'error',
                 'message' => 'Product Short of Stock.'
@@ -282,17 +288,23 @@ class CartController extends Controller
                 'status' => 'error',
                 'message' => 'Coupon Invalid.'
             ]);
-        } elseif ($coupon->start_date > date('Y-m-d')) {
+        }
+
+        if ($coupon->start_date > date('Y-m-d')) {
             return response([
                 'status' => 'error',
                 'message' => 'Coupon Not Available.'
             ]);
-        } elseif ($coupon->end_date < date('Y-m-d')) {
+        }
+
+        if ($coupon->end_date < date('Y-m-d')) {
             return response([
                 'status' => 'error',
                 'message' => 'Coupon Expired.'
             ]);
-        } elseif ($coupon->total_use >= $coupon->quantity) {
+        }
+
+        if ($coupon->total_use >= $coupon->quantity) {
             return response([
                 'status' => 'error',
                 'message' => 'Coupon Not Applicable.'
@@ -356,7 +368,20 @@ class CartController extends Controller
         }
 
         $referrer_id = $this->decodeReferral($referral_code);
-        $referrer = User::find($referrer_id)->first();
+        $referrer = User::findOrFail($referrer_id)->first();
+
+        // Check if the referral pair exists in the referrals table
+        $referralExists = Referral::query()
+            ->where('referrer_id', $referrer->id)
+            ->where('referred_id', Auth::id()) // Assuming you are using Laravel's authentication
+            ->exists();
+
+        if ($referralExists) {
+            return response([
+                'status' => 'error',
+                'message' => 'Code already used.'
+            ]);
+        }
 
         Session::put('referral', [
             'id' => $referrer->id,

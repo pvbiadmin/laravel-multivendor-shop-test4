@@ -9,62 +9,63 @@
 
     $cat_product_col_sliders = [];
 
-    $cat_product_col_sliders[] = $cat_product_sliders[2];
-    $cat_product_col_sliders[] = $cat_product_sliders[3];
+    if ($cat_product_sliders && count($cat_product_sliders) >= 4) {
+        $cat_product_col_sliders[] = $cat_product_sliders[2];
+        $cat_product_col_sliders[] = $cat_product_sliders[3];
 
-    foreach($cat_product_col_sliders as $slider) {
-        $result = [];
+        foreach($cat_product_col_sliders as $slider) {
+            $result = [];
 
-        // Loop through the array in reverse order
-        $keys = array_keys($slider);
+            // Loop through the array in reverse order
+            $keys = array_keys($slider);
 
-        for ($i = count($keys) - 1; $i >= 0; $i--) {
-            $key = $keys[$i];
-            // Check if the element is not null
-            if ($slider[$key] !== null) {
-                // Save the non-null element in the result array
-                $result[$key] = $slider[$key];
-                // Break the loop since we only want the last non-null element
+            for ($i = count($keys) - 1; $i >= 0; $i--) {
+                $key = $keys[$i];
+                // Check if the element is not null
+                if ($slider[$key] !== null) {
+                    // Save the non-null element in the result array
+                    $result[$key] = $slider[$key];
+                    // Break the loop since we only want the last non-null element
+                    break;
+                }
+            }
+
+            switch (key($result)) {
+                case 'subcategory':
+                    $category = \App\Models\Subcategory::query()
+                        ->findOrFail($result['subcategory']);
+                    $products = \App\Models\Product::query()
+                        ->withAvg('reviews', 'rating')
+                        ->where('subcategory_id', '=', $result['subcategory'])
+                        ->orderBy('id', 'DESC')->take(12)->get();
+                break;
+                case 'child_category':
+                    $category = \App\Models\ChildCategory::query()
+                        ->findOrFail($result['child_category']);
+                    $products = \App\Models\Product::query()
+                        ->withAvg('reviews', 'rating')
+                        ->where('child_category_id', '=', $result['child_category'])
+                        ->orderBy('id', 'DESC')->take(12)->get();
+                break;
+                default:
+                    $category = \App\Models\Category::query()
+                        ->findOrFail($result['category']);
+                    $products = \App\Models\Product::query()
+                        ->withAvg('reviews', 'rating')
+                        ->where('category_id', '=', $result['category'])
+                        ->orderBy('id', 'DESC')->take(12)->get();
                 break;
             }
-        }
 
-        switch (key($result)) {
-            case 'subcategory':
-                $category = \App\Models\Subcategory::query()
-                    ->findOrFail($result['subcategory']);
-                $products = \App\Models\Product::query()
-                    ->withAvg('reviews', 'rating')
-                    ->where('subcategory_id', '=', $result['subcategory'])
-                    ->orderBy('id', 'DESC')->take(12)->get();
-            break;
-            case 'child_category':
-                $category = \App\Models\ChildCategory::query()
-                    ->findOrFail($result['child_category']);
-                $products = \App\Models\Product::query()
-                    ->withAvg('reviews', 'rating')
-                    ->where('child_category_id', '=', $result['child_category'])
-                    ->orderBy('id', 'DESC')->take(12)->get();
-            break;
-            default:
-                $category = \App\Models\Category::query()
-                    ->findOrFail($result['category']);
-                $products = \App\Models\Product::query()
-                    ->withAvg('reviews', 'rating')
-                    ->where('category_id', '=', $result['category'])
-                    ->orderBy('id', 'DESC')->take(12)->get();
-            break;
+            $col_sliders[] = [
+                'category' => $category,
+                'products' => $products
+            ];
         }
-
-        $col_sliders[] = [
-            'category' => $category,
-            'products' => $products
-        ];
     }
-
-    /*dd($col_sliders);*/
 @endphp
-@if ( count($col_sliders) > 0 )
+
+@if ( isset($col_sliders) && count($col_sliders) > 0 )
     <section id="wsus__weekly_best" class="home2_wsus__weekly_best_2">
         <div class="container">
             <div class="row">

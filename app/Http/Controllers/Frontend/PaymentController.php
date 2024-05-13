@@ -9,10 +9,12 @@ use App\Models\GeneralSetting;
 use App\Models\Order;
 use App\Models\OrderProduct;
 use App\Models\PaypalSetting;
+use App\Models\PointTransaction;
 use App\Models\Product;
 use App\Models\Referral;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Models\WalletTransaction;
 use Auth;
 use Gloudemans\Shoppingcart\Facades\Cart;
 use Illuminate\Contracts\View\Factory;
@@ -64,15 +66,17 @@ class PaymentController extends Controller
      * @param $transaction_id
      * @param $paid_amount
      * @param $paid_currency_name
+     * @return \App\Models\Order
+     * @throws Exception
      */
     public function storeOrder(
-        $payment_method, $payment_status, $transaction_id, $paid_amount, $paid_currency_name)
+        $payment_method, $payment_status, $transaction_id, $paid_amount, $paid_currency_name): Order
     {
         $general_settings = GeneralSetting::query()->firstOrFail();
 
         $order = new Order();
 
-        $order->invoice_id = rand(1, 999999);
+        $order->invoice_id = random_int(1, 999999);
         $order->user_id = Auth::user()->id;
         $order->subtotal = cartSubtotal();
         $order->amount = payableTotal();
@@ -90,25 +94,111 @@ class PaymentController extends Controller
 
         $this->storeOrderProduct($order->id);
         $this->updateCoupon();
-        $this->referralEntry();
         $this->storeOrderTransaction(
             $order->id, $transaction_id, $payment_method, $paid_amount, $paid_currency_name);
+
+        return $order;
     }
 
-    public function referralEntry()
+    /**
+     * Enter user into referral table with activation
+     * Add to sponsor wallet
+     * Add to sponsor points
+     *
+     * @return bool
+     */
+    public function referralEntry($details = [], $type = 'credit', $activated = true)
     {
+        $entered = false;
+
         $referral_session = Session::get('referral');
 
         if ($referral_session && isset($referral_session['id'])) {
-            $referrer_id = User::find($referral_session['id'])->first()->id;
+            $referrer = User::findOrFail($referral_session['id'])->first();
             $referred_id = auth()->user()->id;
 
+            // encode into referral table and activate
             Referral::create([
-                'referrer_id' => $referrer_id,
+                'referrer_id' => $referrer->id,
                 'referred_id' => $referred_id,
-                'status' => 0,
+                'status' => $activated ? 1 : 0,
             ]);
+
+            $this->addToWallet($referrer, $referral_session['bonus'], $details, $type);
+            $this->addToPoints($referrer, $referral_session['points'], $details, $type);
+
+            $entered = true;
         }
+
+        return $entered;
+    }
+
+    /**
+     * Add to user wallet
+     *
+     * @param $user
+     * @param $value
+     * @param array $details
+     * @param string $type
+     */
+    public function addToWallet($user, $value, $details = [], $type = 'credit')
+    {
+        // add bonus and points to referrer
+        $wallet = $user->wallet;
+
+        if (!$wallet) {
+            // Create a wallet record for the user with a zero balance
+            $wallet = $user->wallet()->create(['balance' => 0]);
+        }
+
+        $wallet->balance += $value;
+        $wallet->save();
+
+        $data = [
+            'wallet_id' => $wallet->id,
+            'type' => $type,
+            'amount' => $value,
+        ];
+
+        if (!empty($details)) {
+            $data['details'] = json_encode($details);
+        }
+
+        WalletTransaction::create($data);
+    }
+
+    /**
+     * Add to user Points
+     *
+     * @param $user
+     * @param $value
+     * @param array $details
+     * @param string $type
+     */
+    public function addToPoints($user, $value, $details = [], $type = 'credit')
+    {
+        // add to user points
+        $points = $user->point;
+
+        if (!$points) {
+            // Create a wallet record for the user with a zero balance
+            $points = $user->point()->create(['balance' => 0]);
+        }
+
+        $points->balance += $value;
+        $points->save();
+
+        $data = [
+            'wallet_id' => $points->id,
+            'type' => $type,
+            'amount' => $value,
+        ];
+
+        if (!empty($details)) {
+            $data['details'] = json_encode($details);
+        }
+
+        PointTransaction::create($data);
     }
 
     public function updateCoupon()
@@ -223,21 +313,44 @@ class PaymentController extends Controller
     {
         $setting = PaypalSetting::query()->first();
 
+        if ($setting) {
+            return [
+                'mode' => $setting->mode === 1 ? 'live' : 'sandbox',
+                'sandbox' => [
+                    'client_id' => $setting->client_id,
+                    'client_secret' => $setting->secret_key,
+                    'app_id' => '',
+                ],
+                'live' => [
+                    'client_id' => $setting->client_id,
+                    'client_secret' => $setting->secret_key,
+                    'app_id' => '',
+                ],
+
+                'payment_action' => 'Sale',
+                'currency' => $setting->currency_name,
+                'notify_url' => '',
+                'locale' => 'en_US',
+                'validate_ssl' => true,
+            ];
+        }
+
+// Default configuration if setting is not found
         return [
-            'mode' => $setting->mode === 1 ? 'live' : 'sandbox',
+            'mode' => 'sandbox', // or 'live' based on your default preference
             'sandbox' => [
-                'client_id' => $setting->client_id,
-                'client_secret' => $setting->secret_key,
+                'client_id' => '',
+                'client_secret' => '',
                 'app_id' => '',
             ],
             'live' => [
-                'client_id' => $setting->client_id,
-                'client_secret' => $setting->secret_key,
+                'client_id' => '',
+                'client_secret' => '',
                 'app_id' => '',
             ],
 
             'payment_action' => 'Sale',
-            'currency' => $setting->currency_name,
+            'currency' => 'USD', // or any default currency
             'notify_url' => '',
             'locale' => 'en_US',
             'validate_ssl' => true,
@@ -351,7 +464,8 @@ class PaymentController extends Controller
 
             $response = $provider->capturePaymentOrder($request->token);
 
-            if (isset($response['status']) && $response['status'] === 'COMPLETED') {
+            // Check if $response is not null and has 'status' and 'id' keys
+            if ($response && isset($response['status'], $response['id']) && $response['status'] === 'COMPLETED') {
                 $paypal_setting = PaypalSetting::query()->firstOrFail();
 
                 $this->storeOrder(
@@ -362,13 +476,17 @@ class PaymentController extends Controller
                     $paypal_setting->currency_name
                 );
 
-                $this->clearSession();
+                if ($this->referralEntry()) {
+                    $this->clearSession();
+                }
 
                 return redirect()->route('user.payment.success');
             }
         } catch (Throwable $exception) {
             // Log the exception or handle it appropriately
-            logger()->error('PayPal Success Error: ' . $exception->getMessage());
+            if ($exception) {
+                logger()?->error('Error processing PayPal success action: ' . $exception->getMessage());
+            }
         }
 
         return redirect()->route('user.paypal.cancel');
@@ -388,19 +506,25 @@ class PaymentController extends Controller
             ]);
     }
 
-    public function payWithCod()
+    /**
+     * Cash-on-Delivery Payment
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Exception
+     */
+    public function payWithCod(): RedirectResponse
     {
         $codPaySetting = CodSetting::query()->first();
         $setting = GeneralSetting::first();
 
-        if ($codPaySetting->status == 0) {
+        if ($codPaySetting && $codPaySetting->status === 0) {
             return redirect()->back();
         }
 
         // amount calculation
         $payableAmount = round(payableTotal(), 2);
 
-        $this->storeOrder(
+        $order = $this->storeOrder(
             'COD',
             0,
             Str::random(10),
@@ -408,8 +532,9 @@ class PaymentController extends Controller
             $setting->currency_name
         );
 
-        // clear session
-        $this->clearSession();
+        if ($this->referralEntry(['order_id' => $order->id], 'pending_credit', false)) {
+            $this->clearSession();
+        }
 
         return redirect()->route('user.payment.success');
     }
