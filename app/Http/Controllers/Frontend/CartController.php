@@ -95,6 +95,7 @@ class CartController extends Controller
      * View Cart Page
      *
      * @return \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
+     * @throws \JsonException
      */
     public function cartDetails(): View|Application|Factory|\Illuminate\Contracts\Foundation\Application
     {
@@ -104,9 +105,9 @@ class CartController extends Controller
             Session::forget('coupon');
         }
 
-        $cart_page_banner_section = Advertisement::query()
-            ->where('key', 'cart_page_banner_section')->first();
-        $cart_page_banner_section = json_decode($cart_page_banner_section?->value);
+        $cart_page_banner_section = Advertisement::where('key', 'cart_page_banner_section')->first();
+        $cart_page_banner_section = json_decode(
+            $cart_page_banner_section?->value, false, 512, JSON_THROW_ON_ERROR);
 
         return view('frontend.pages.cart-detail',
             compact('cart_items', 'cart_page_banner_section'));
@@ -118,7 +119,7 @@ class CartController extends Controller
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Foundation\Application|\Illuminate\Http\Response|\Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory
      */
-    function updateProductQty(Request $request): Application|Response|\Illuminate\Contracts\Foundation\Application|ResponseFactory
+    public function updateProductQty(Request $request): Application|Response|\Illuminate\Contracts\Foundation\Application|ResponseFactory
     {
         $rowId = $request->input('rowId');
         $quantity = $request->input('quantity');
@@ -356,6 +357,12 @@ class CartController extends Controller
         ]);
     }
 
+    /**
+     * Set the referral session
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Foundation\Application|\Illuminate\Http\Response|\Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory
+     */
     public function applyReferral(Request $request): Application|Response|\Illuminate\Contracts\Foundation\Application|ResponseFactory
     {
         $referral_code = $request->input('referral');
@@ -397,7 +404,13 @@ class CartController extends Controller
         ]);
     }
 
-    public function decodeReferral($referral_code)
+    /**
+     * Retrieve the user_id from the hash
+     *
+     * @param $referral_code
+     * @return array
+     */
+    public function decodeReferral($referral_code): array
     {
         /* To do: Obtain the referrer_id based on the referral code */
         return Hashids::decode($referral_code);

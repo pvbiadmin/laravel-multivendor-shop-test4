@@ -79,7 +79,7 @@
 
             <ul class="wsus__single_pro_icon">
                 <li>
-                    @if ( $cart_package && $cart_package[0]->options->is_package == 1 ) @else
+                    @if ( $cart_package && $cart_package[0]->options->is_package === '1' ) @else
                         <form class="cart-form">
                             <input type="hidden" name="product_id" value="{{ $product->id }}">
                             <input type="hidden" name="quantity" value="1"/>
@@ -87,13 +87,14 @@
                                 <input type="hidden" name="is_package" value="1"/>
                             @endif
                             @foreach ( $product->variants as $variant )
-                                @if ( $variant->status != 0 )
+                                @if ( str($variant->status) !== '0' )
                                     <select id="variant_{{ $variant->id }}" class="d-none" name="variant_options[]"
                                             aria-label="product_variant">
                                         @foreach ( $variant->productVariantOptions as $option )
-                                            @if ( $option->status != 0 )
+                                            @if ( str($option->status) !== '0' )
                                                 <option
-                                                    value="{{ $option->id }}" @selected ( $option->is_default == 1 )>
+                                                    value="{{ $option->id }}" @selected (
+                                                        str($option->is_default) === '1' )>
                                                 </option>
                                             @endif
                                         @endforeach

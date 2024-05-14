@@ -15,9 +15,12 @@
         "srmklive/paypal": "~3.0",
         "vinkla/hashids": "^11.0",
         "yajra/laravel-datatables": "^10.1",
-        "yoeunes/toastr": "^2.3"
+        "yoeunes/toastr": "^2.3",
+      "ext-pdo": "*"
     },
     "require-dev": {
+        "roave/security-advisories": "dev-latest"
+        ,
         "barryvdh/laravel-debugbar": "^3.9",
         "barryvdh/laravel-ide-helper": "^2.13",
         "fakerphp/faker": "^1.9.1",

@@ -13,9 +13,12 @@ use JetBrains\PhpStorm\Pure;
  */
 function setActive(array $routes): string
 {
-    if (is_array($routes)) {
+    $request = request(); // Get the request object first
+
+    if ($request && is_array($routes)) {
         foreach ($routes as $route) {
-            if (request()->routeIs($route)) {
+            // Ensure request()->routeIs() is called on a valid object
+            if ($request->routeIs($route)) {
                 return 'active';
             }
         }
@@ -208,7 +211,7 @@ function currencyList(?string $code = null, bool $decode_html_entity = true): ar
 
     if (true === $decode_html_entity) {
 
-        $currencies = array_map(function ($each_cur) {
+        $currencies = array_map(static function ($each_cur) {
 
             $each_cur['symbol'] = html_entity_decode($each_cur['symbol']);
 
@@ -218,7 +221,8 @@ function currencyList(?string $code = null, bool $decode_html_entity = true): ar
     }
 
     if (!is_null($code)) {
-        return array_values(array_filter($currencies, fn($c) => strtolower($c['code']) === strtolower($code)))[0] ?? null;
+        return array_values(array_filter(
+            $currencies, static fn($c) => strtolower($c['code']) === strtolower($code)))[0] ?? null;
     }
 
     return $currencies;
@@ -939,7 +943,13 @@ function getProductTotal($row_id): float|int
 {
     $product = Cart::get($row_id);
 
-    return $product->price * $product->qty + $product->options->variant_price_total;
+    $total = $product->price * $product->qty;
+
+    if (property_exists($product->options, 'variant_price_total')) {
+        $total += $product->options->variant_price_total;
+    }
+
+    return $total;
 }
 
 
@@ -975,7 +985,9 @@ function cartTotal(): mixed
             $discount = $coupon['discount'] * $total / 100;
 
             return $total - $discount;
-        } elseif ($coupon['discount_type'] === 'amount') {
+        }
+
+        if ($coupon['discount_type'] === 'amount') {
             $discount = $coupon['discount'];
 
             return $total - $discount;
@@ -994,9 +1006,9 @@ function cartPackage(): array
 {
     $cart_package = [];
 
-    if ( session()->has('cart') && isset(session('cart')['default']) ) {
+    if ( isset(session('cart')['default']) && session()->has('cart') ) {
         foreach (session('cart')['default'] as $val ) {
-            if ($val->options->is_package == 1) {
+            if ($val->options->is_package === '1') {
                 $cart_package[] = $val;
             }
         }
@@ -1067,9 +1079,7 @@ function payableTotal(): mixed
     return Str::limit($text, $limit);
 }
 
-function getCurrencyIcon()
+function getCurrencyIcon(): string
 {
-    $icon = GeneralSetting::first();
-
-    return $icon->currency_icon;
+    return GeneralSetting::first()->currency_icon;
 }
